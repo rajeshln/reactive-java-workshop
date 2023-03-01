@@ -1,7 +1,5 @@
 package io.javabrains.reactiveworkshop;
 
-import reactor.core.publisher.Flux;
-
 import java.io.IOException;
 
 public class Exercise8 {
@@ -12,7 +10,10 @@ public class Exercise8 {
         // Use ReactiveSources.intNumbersFluxWithException()
 
         // Print values from intNumbersFluxWithException and print a message when error happens
-        // TODO: Write code here
+        ReactiveSources.intNumbersFluxWithException()
+                .doOnError(throwable -> System.out.println(throwable.getMessage()))
+                .subscribe(System.out::println);
+
 
         // Print values from intNumbersFluxWithException and continue on errors
         // TODO: Write code here
