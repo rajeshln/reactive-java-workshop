@@ -23,6 +23,8 @@ public class Exercise1 {
         // TODO: Write code here
 
         // Print first names in userStream for users that have IDs from number stream
+
+        /// when the right side is stream we use flat map
         StreamSources.intNumbersStream()
                 .flatMap((id -> StreamSources.userStream().filter(user -> user.getId() == id)))
                 .map(user -> user.getFirstName())
