@@ -1,0 +1,111 @@
+
+In Reactor, which is a reactive programming library for building asynchronous and event-driven
+ applications in Java, the Flux class represents a sequence of 0 to N items. It provides a variety of operators and methods to perform common operations on
+ the data stream. Here are some of the most common operations you can perform with Flux:
+
+Creating Flux:
+
+just: Create a Flux that emits the specified items.
+fromIterable: Create a Flux from an Iterable.
+range: Create a Flux that emits a range of integer values.
+empty: Create an empty Flux.
+error: Create a Flux that emits an error.
+Transforming Flux:
+
+map: Transform each element emitted by the Flux.
+flatMap: Transform each element into a Flux and flatten the result.
+filter: Emit only elements that satisfy a given predicate.
+concatMap: Similar to flatMap but preserves the order of items.
+Combining Flux:
+
+merge: Merge elements from multiple Flux instances into a single Flux.
+concat: Concatenate elements from multiple Flux instances into a single Flux.
+zip: Combine elements from multiple Flux instances into tuples.
+Handling Errors:
+
+onErrorResume: Continue emitting items from a fallback Flux when an error occurs.
+onErrorReturn: Emit a default value when an error occurs.
+doOnError: Perform a side effect when an error occurs.
+Aggregating Operations:
+
+reduce: Aggregate the elements into a single value using a provided function.
+collectList and collectMap: Collect elements into a List or Map.
+count: Count the number of elements in the Flux.
+Filtering and Distinct:
+
+distinct: Emit distinct elements (based on their hashCode and equals).
+distinctUntilChanged: Emit consecutive distinct elements.
+take and takeLast: Take a specified number of elements from the beginning or end.
+Time-Related Operations:
+
+delayElements: Introduce a delay between emitting elements.
+interval: Emit long values representing time at regular intervals.
+timeout: Emit an error if no item is received within a specified time.
+Concurrency Control:
+
+publishOn and subscribeOn: Control the thread on which operations are executed.
+parallel: Parallelize the processing of elements.
+These are just a few examples, and Reactor provides many more operators to handle various scenarios in
+ reactive programming. The combination of these operators allows you to create complex and efficient data processing pipelines.
+
+
+   // Creating Flux
+         Flux<Integer> justFlux = Flux.just(1, 2, 3, 4, 5);
+         List<String> list = Arrays.asList("A", "B", "C");
+         Flux<String> fromIterableFlux = Flux.fromIterable(list);
+         Flux<Integer> rangeFlux = Flux.range(1, 5);
+         Flux<Object> emptyFlux = Flux.empty();
+         Flux<Object> errorFlux = Flux.error(new RuntimeException("Something went wrong"));
+
+         // Transforming Flux
+         Flux<String> mapFlux = justFlux.map(i -> "Number: " + i);
+         Flux<String> flatMapFlux = Flux.just("apple", "banana", "orange")
+                 .flatMap(fruit -> Flux.fromArray(fruit.split("")));
+         Flux<Integer> filterFlux = rangeFlux.filter(i -> i % 2 == 0);
+         Flux<String> concatMapFlux = Flux.just("apple", "banana", "orange")
+                 .concatMap(fruit -> Flux.fromArray(fruit.split("")));
+
+         // Combining Flux
+         Flux<Integer> flux1 = Flux.just(1, 2, 3);
+         Flux<Integer> flux2 = Flux.just(4, 5, 6);
+         Flux<Integer> mergedFlux = Flux.merge(flux1, flux2);
+         Flux<Integer> concatenatedFlux = Flux.concat(flux1, flux2);
+         Flux<Tuple2<Integer, String>> zippedFlux = Flux.zip(flux1, Flux.just("A", "B", "C"));
+
+         // Handling Errors
+         Flux<Integer> errorHandlingFlux = justFlux.concatWith(Flux.error(new RuntimeException("Error occurred")))
+                 .onErrorResume(e -> Flux.just(-1, -2));
+         Flux<Integer> errorReturnFlux = justFlux.concatWith(Flux.error(new RuntimeException("Error occurred")))
+                 .onErrorReturn(-1);
+         Flux<Integer> doOnErrorFlux = justFlux.concatWith(Flux.error(new RuntimeException("Error occurred")))
+                 .doOnError(e -> System.err.println("Error: " + e.getMessage()));
+
+         // Aggregating Operations
+         Mono<Integer> sumMono = justFlux.reduce((x, y) -> x + y);
+         Mono<List<Integer>> listMono = justFlux.collectList();
+         Mono<Long> countMono = justFlux.count();
+
+         // Filtering and Distinct
+         Flux<Integer> distinctFlux = Flux.just(1, 2, 2, 3, 3, 4, 5).distinct();
+         Flux<Integer> distinctUntilChangedFlux = Flux.just(1, 1, 2, 3, 3, 4, 5).distinctUntilChanged();
+         Flux<Integer> takeFlux = justFlux.take(3);
+         Flux<Integer> takeLastFlux = justFlux.takeLast(2);
+
+         // Time-Related Operations
+         Flux<Integer> delayElementsFlux = justFlux.delayElements(Duration.ofSeconds(1));
+         Flux<Long> intervalFlux = Flux.interval(Duration.ofSeconds(1)).take(5);
+         Flux<Integer> timeoutFlux = justFlux.concatWith(Flux.just(4).delayElements(Duration.ofSeconds(3)))
+                 .timeout(Duration.ofSeconds(2));
+
+         // Concurrency Control
+         Flux<Integer> publishOnSubscribeOnFlux = justFlux.publishOn(ioProjectReactor())
+                 .map(i -> i * 2)
+                 .subscribeOn(Schedulers.single());
+
+         Flux<Integer> parallelFlux = justFlux.parallel()
+                 .runOn(Schedulers.parallel())
+                 .map(i -> i * 2)
+                 .sequential();
+
+         // Print the results or subscribe to the Flux or Mono as needed
+         distinctUntilChangedFlux.subscribe(System.out::println);
